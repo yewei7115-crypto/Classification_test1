@@ -1,0 +1,16 @@
+seed: 42
+data_dir: ./data
+output_dir: ./experiments/resnet18_cifar10
+model:
+  name: resnet18
+  pretrained: true
+  num_classes: 10
+training:
+  epochs: 20
+  batch_size: 256
+  num_workers: 8
+  learning_rate: 0.01
+  weight_decay: 0.0005
+  label_smoothing: 0.1
+  amp: true
+
