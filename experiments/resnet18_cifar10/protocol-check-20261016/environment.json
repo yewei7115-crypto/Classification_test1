@@ -1,0 +1,10 @@
+{
+  "python": "3.13.11",
+  "torch": "2.9.0+cu126",
+  "torchvision": "0.24.0+cu126",
+  "numpy": "2.4.6",
+  "pyyaml": "6.0.3",
+  "cuda": "12.6",
+  "cudnn": 91002,
+  "gpu": "NVIDIA GeForce RTX 3090"
+}

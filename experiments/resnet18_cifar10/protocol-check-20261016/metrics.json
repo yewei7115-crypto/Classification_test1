@@ -1,0 +1,38 @@
+{
+  "config": {
+    "seed": 42,
+    "deterministic": true,
+    "val_size": 5000,
+    "data_dir": "./data",
+    "output_dir": "./experiments/resnet18_cifar10",
+    "model": {
+      "name": "resnet18",
+      "pretrained": true,
+      "num_classes": 10
+    },
+    "training": {
+      "epochs": 1,
+      "batch_size": 256,
+      "num_workers": 8,
+      "learning_rate": 0.01,
+      "weight_decay": 0.0005,
+      "label_smoothing": 0.1,
+      "amp": true
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.2488343226538765,
+      "train_acc": 0.6753555555555556,
+      "val_loss": 0.9381595327377319,
+      "val_acc": 0.8256,
+      "lr": 0.01
+    }
+  ],
+  "best_val_acc": 0.8256,
+  "best_epoch": 1,
+  "test_loss": 0.9441692220687866,
+  "test_acc": 0.8223,
+  "elapsed_seconds": 8.023406267166138
+}

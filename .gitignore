@@ -1,5 +1,5 @@
 data/
-experiments/*/*.pt
+experiments/**/*.pt
 __pycache__/
 *.pyc
 .venv/
