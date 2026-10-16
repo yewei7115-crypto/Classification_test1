@@ -1,5 +1,6 @@
 data/
 experiments/**/*.pt
+experiments/**/*.tmp
 __pycache__/
 *.pyc
 .venv/

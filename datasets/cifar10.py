@@ -40,7 +40,7 @@ def build_loaders(data_dir: str, batch_size: int, num_workers: int, seed=42, val
         raise ValueError("val_size must be between 1 and the training set size minus 1")
     indices = torch.randperm(len(train_set), generator=torch.Generator().manual_seed(seed)).tolist()
     common = dict(batch_size=batch_size, num_workers=num_workers,
-                  pin_memory=torch.cuda.is_available(), persistent_workers=num_workers > 0)
+                  pin_memory=torch.cuda.is_available(), persistent_workers=False)
     train_loader = DataLoader(Subset(train_set, indices[val_size:]), shuffle=True,
                               generator=torch.Generator().manual_seed(seed), **common)
     val_loader = DataLoader(Subset(val_set, indices[:val_size]), shuffle=False, **common)

@@ -18,22 +18,25 @@ cosine annealing, and automatic mixed precision.
 
 ## Results
 
-The following table describes the **historical experiment**. It selected the best epoch
-using the test set, so 93.84% is a test-selected maximum, not an independent final score.
-The corrected pipeline splits the 50,000 training images into 45,000 training and 5,000
+The pipeline splits the 50,000 training images into 45,000 training and 5,000
 validation images (seed 42), selects checkpoints using validation accuracy, and evaluates
-the selected checkpoint once on the 10,000 test images. A full 20-epoch result requires
-retraining; the corrected one-epoch functional check reached 82.23% test accuracy.
+the selected checkpoint once on the 10,000 test images. The table reports the completed
+20-epoch experiment `baseline-20ep-20261016`. Independent checkpoint evaluation
+reproduced the final test accuracy.
 
 | Metric | Value |
 | --- | ---: |
 | Model | ResNet-18 |
 | Dataset | CIFAR-10 |
 | Training epochs | 20 |
-| Best epoch | 16 |
-| Historical maximum test accuracy (used for selection) | **93.84%** |
+| Best epoch (selected by validation accuracy) | 18 |
+| Best validation accuracy | 93.98% |
+| Final test accuracy | **93.30%** |
 | GPU | NVIDIA RTX 3090 24GB |
-| Training time | 244.04 seconds |
+| Training and final evaluation time | 144.06 seconds |
+
+The previous 93.84% result used the test set for checkpoint selection and is retained
+only as a historical record in [`docs/RESULTS.md`](docs/RESULTS.md).
 
 ## Project Structure
 
@@ -61,6 +64,16 @@ Classification_test/
 pip install -r requirements.txt
 ```
 
+For the tested Linux / Python 3.13.11 / CUDA 12.6 setup, install the pinned direct
+dependencies instead:
+
+```bash
+pip install -r requirements-lock.txt
+```
+
+The pinned file targets the server's CUDA build. Use a compatible PyTorch build for
+other platforms. It does not pin every transitive dependency.
+
 ### 2. Train the Model
 
 ```bash
@@ -74,6 +87,7 @@ The best checkpoint, metrics, and actual environment versions are saved to:
 ```text
 experiments/resnet18_cifar10/<run-name>/
 ├── best.pt
+├── last.pt
 ├── metrics.json
 └── environment.json
 ```
@@ -100,6 +114,39 @@ Replace `<run-name>` with the actual directory name. Prediction resizes RGB imag
 32×32 and prints the top three class probabilities. Performance on arbitrary images
 outside CIFAR-10 is not established.
 
+### 6. Resume an Interrupted Run
+
+```bash
+python scripts/train.py --resume experiments/resnet18_cifar10/baseline/last.pt
+```
+
+Resume continues at the next completed-epoch boundary, using the configuration stored
+in `last.pt`. It restores model, optimizer, scheduler, AMP scaler, random generators,
+data-loader generator, best model, and history. Work from an incomplete epoch is
+replayed. `--epochs` and `--run-name` cannot be combined with `--resume`; the original
+learning-rate schedule is retained. Completed runs are rejected to avoid repeating
+their final test evaluation. Exact continuation requires the same environment and
+device setup. Data-loader workers are recreated each epoch so their random states
+can be reconstructed.
+
+For a controlled interruption test with a 20-epoch schedule:
+
+```bash
+python scripts/train.py --run-name baseline --stop-after 1
+python scripts/train.py --resume experiments/resnet18_cifar10/baseline/last.pt
+```
+
+### 7. Run Regression Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+These tests do not download weights or CIFAR-10. They cover invalid configurations,
+split reproducibility and disjointness, overwrite protection, random-state restoration,
+and model checkpoint round trips. GitHub Actions runs them on CPU for each push and
+pull request.
+
 ## Configuration
 
 The main hyperparameters are defined in `configs/resnet18.yaml`, including batch size,
@@ -112,6 +159,8 @@ Each run records Python, PyTorch, torchvision, NumPy, PyYAML, CUDA, cuDNN, and G
 in `environment.json`. The historical run used Python 3.13.11, PyTorch 2.9.0+cu126,
 and torchvision 0.24.0+cu126; its remaining package versions were not recorded.
 The minimum versions in `requirements.txt` are not an exact environment lock.
+Only `model.name: resnet18` and `model.num_classes: 10` are supported; incompatible
+values fail before any output directory is created or data is downloaded.
 
 ## Model and Dataset Sources
 
